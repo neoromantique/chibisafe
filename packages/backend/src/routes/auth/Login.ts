@@ -104,6 +104,8 @@ export const run = async (req: FastifyRequest, res: FastifyReply) => {
 		.setCookie('token', jwt, {
 			expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
 			httpOnly: true,
+			secure: process.env.NODE_ENV === 'production',
+			sameSite: 'strict',
 			path: '/'
 		})
 		.send(response);

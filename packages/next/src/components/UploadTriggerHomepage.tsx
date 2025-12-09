@@ -2,6 +2,7 @@
 import { UploadCloudIcon } from 'lucide-react';
 import { UploadTrigger } from './UploadTrigger';
 import { Button } from './ui/react-aria-button';
+import { Button as ShadcnButton } from './ui/button';
 import { formatBytes } from '@/lib/file';
 import type { Album, Settings } from '@/types';
 import { currentUserAtom } from '@/lib/atoms/currentUser';
@@ -9,16 +10,31 @@ import { useAtomValue } from 'jotai';
 import { buttonVariants } from '@/styles/button';
 import { cn } from '@/lib/utils';
 import { Combobox } from './Combobox';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import request from '@/lib/request';
 import { toast } from 'sonner';
+import { createAlbumAndReturn } from '@/actions/CreateAlbumAndReturn';
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 export const UploadTriggerHomepage = ({ settings }: { readonly settings: Settings }) => {
 	const currentUser = useAtomValue(currentUserAtom);
 	const [albums, setAlbums] = useState<Album[]>([]);
 	const [isDisabled, setIsDisabled] = useState(true);
 	const [selectedAlbum, setSelectedAlbum] = useState<string | null>(null);
+	const [selectedAlbumName, setSelectedAlbumName] = useState<string>('');
 	const [isLoggedIn, setIsLoggedIn] = useState(false);
+	const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+	const [newAlbumName, setNewAlbumName] = useState('');
+	const [isCreating, setIsCreating] = useState(false);
 
 	useEffect(() => {
 		if (!settings?.publicMode && !currentUser?.uuid) {
@@ -55,11 +71,47 @@ export const UploadTriggerHomepage = ({ settings }: { readonly settings: Setting
 		void fetchAlbums();
 	}, [currentUser?.uuid, settings.publicMode]);
 
+	const handleCreateAlbum = useCallback(async () => {
+		if (!newAlbumName.trim()) {
+			toast.error('Album name is required');
+			return;
+		}
+
+		setIsCreating(true);
+		const result = await createAlbumAndReturn(newAlbumName.trim());
+		setIsCreating(false);
+
+		if (result.error) {
+			toast.error(result.error);
+			return;
+		}
+
+		if (result.album) {
+			setAlbums(prev => [...prev, { ...result.album, uuid: result.album.uuid, name: result.album.name } as Album]);
+			setSelectedAlbum(result.album.uuid);
+			setSelectedAlbumName(result.album.name);
+			toast.success('Album created');
+			setIsCreateDialogOpen(false);
+			setNewAlbumName('');
+		}
+	}, [newAlbumName]);
+
+	const handleKeyDown = useCallback(
+		(e: React.KeyboardEvent) => {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				void handleCreateAlbum();
+			}
+		},
+		[handleCreateAlbum]
+	);
+
 	return isDisabled ? (
 		<div className="flex items-center justify-center w-2/3 mt-8">
 			Uploading files without an account is currently disabled.
 		</div>
 	) : (
+		<>
 		<UploadTrigger allowsMultiple albumUuid={selectedAlbum ?? ''}>
 			<div className="flex flex-col items-center justify-center sm:w-3/6 h-40 w-full">
 				<div
@@ -87,14 +139,50 @@ export const UploadTriggerHomepage = ({ settings }: { readonly settings: Setting
 								value: album.name,
 								label: album.name
 							}))}
-							onSelected={value =>
-								setSelectedAlbum(albums.find(album => album.name === value)?.uuid ?? null)
-							}
+							onSelected={value => {
+								setSelectedAlbum(albums.find(album => album.name === value)?.uuid ?? null);
+								setSelectedAlbumName(value);
+							}}
 							placeholder="Select album..."
+							createNewLabel="Create new album"
+							onCreateNew={() => setIsCreateDialogOpen(true)}
+							selectedValue={selectedAlbumName}
 						/>
 					</div>
 				)}
 			</div>
+
 		</UploadTrigger>
+
+		<Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+			<DialogContent className="w-11/12 sm:max-w-md">
+				<DialogHeader>
+					<DialogTitle>Create new album</DialogTitle>
+					<DialogDescription>Enter a name for your new album</DialogDescription>
+				</DialogHeader>
+				<div className="grid gap-4 py-4">
+					<div className="grid grid-cols-4 items-center gap-4">
+						<Label htmlFor="albumName" className="text-right">
+							Name
+						</Label>
+						<Input
+							id="albumName"
+							value={newAlbumName}
+							onChange={e => setNewAlbumName(e.target.value)}
+							onKeyDown={handleKeyDown}
+							placeholder="Album name"
+							className="col-span-3"
+							autoFocus
+						/>
+					</div>
+				</div>
+				<DialogFooter>
+					<ShadcnButton onClick={() => void handleCreateAlbum()} disabled={isCreating}>
+						{isCreating ? 'Creating...' : 'Create'}
+					</ShadcnButton>
+				</DialogFooter>
+			</DialogContent>
+		</Dialog>
+		</>
 	);
 };

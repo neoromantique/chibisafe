@@ -98,6 +98,7 @@ export interface Album {
 	id: number;
 	name: string;
 	nsfw: boolean;
+	sortOrder?: string | null;
 	userId: number;
 	uuid: string;
 	zippedAt: Date | null;
@@ -150,6 +151,7 @@ export interface Settings {
 	useUrlShortener: boolean;
 	userAccounts: boolean;
 	usersStorageQuota: number;
+	defaultSortOrder: string;
 }
 
 export interface RouteOptions {

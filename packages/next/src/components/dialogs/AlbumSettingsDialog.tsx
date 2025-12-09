@@ -24,6 +24,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 import { AlbumSettingsDialogActions } from '../AlbumSettingsDialogActions';
 import { AlbumLinksTable } from '../tables/album-links-table/AlbumLinksTable';
@@ -123,6 +124,26 @@ export function AlbumSettingsDialog({ children }: PropsWithChildren<{}>) {
 							<div>
 								<Label htmlFor="description">Description</Label>
 								<Textarea id="description" name="description" defaultValue={album?.description} />
+							</div>
+							<div>
+								<Label htmlFor="sortOrder">Sort Order</Label>
+								<Select name="sortOrder" defaultValue={album?.sortOrder ?? ''}>
+									<SelectTrigger>
+										<SelectValue placeholder="Use global default" />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="">Use global default</SelectItem>
+										<SelectItem value="createdAt:desc">Newest first</SelectItem>
+										<SelectItem value="createdAt:asc">Oldest first</SelectItem>
+										<SelectItem value="name:asc">Name (A-Z)</SelectItem>
+										<SelectItem value="name:desc">Name (Z-A)</SelectItem>
+										<SelectItem value="size:desc">Largest first</SelectItem>
+										<SelectItem value="size:asc">Smallest first</SelectItem>
+									</SelectContent>
+								</Select>
+								<p className="text-[0.8rem] text-muted-foreground mt-1">
+									How files in this album should be sorted. Leave empty to use global default.
+								</p>
 							</div>
 							<div className="space-y-2 flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
 								<div className="space-y-0.5">

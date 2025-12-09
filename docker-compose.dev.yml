@@ -2,9 +2,15 @@ version: "3.7"
 
 services:
   chibisafe:
-    image: chibisafe/chibisafe:dev
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.dev
     environment:
       - BASE_API_URL=http://chibisafe_server:8000
+      - WATCHPACK_POLLING=true
+    volumes:
+      - ./packages/next:/app/packages/next
+      - chibisafe_next_node_modules:/app/packages/next/node_modules
     expose:
       - 8001
     restart: unless-stopped
@@ -44,3 +50,6 @@ services:
       MINIO_ROOT_PASSWORD: adminadmin
       MINIO_VOLUMES: /data
     command: minio server --console-address ":9001"
+
+volumes:
+  chibisafe_next_node_modules:

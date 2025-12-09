@@ -28,18 +28,11 @@ jobs:
         uses: docker/setup-buildx-action@v2
 
       -
-        name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      -
         name: Log in to GitHub Container Registry
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
+          username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       -
@@ -51,10 +44,8 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            chibisafe/chibisafe:latest
-            chibisafe/chibisafe:${{ env.tag }}
-            ghcr.io/chibisafe/chibisafe:latest
-            ghcr.io/chibisafe/chibisafe:${{ env.tag }}
+            ghcr.io/${{ github.repository_owner }}/chibisafe:latest
+            ghcr.io/${{ github.repository_owner }}/chibisafe:${{ env.tag }}
 
       -
         name: Build and push
@@ -65,7 +56,5 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            chibisafe/chibisafe-server:latest
-            chibisafe/chibisafe-server:${{ env.tag }}
-            ghcr.io/chibisafe/chibisafe-server:latest
-            ghcr.io/chibisafe/chibisafe-server:${{ env.tag }}
+            ghcr.io/${{ github.repository_owner }}/chibisafe-server:latest
+            ghcr.io/${{ github.repository_owner }}/chibisafe-server:${{ env.tag }}

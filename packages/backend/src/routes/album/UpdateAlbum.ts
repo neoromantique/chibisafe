@@ -15,20 +15,12 @@ export const schema = {
 			uuid: z.string().describe('The uuid of the album.')
 		})
 		.required(),
-	body: z.union([
-		z.object({
-			name: z.string().describe('The name of the album.'),
-			description: z.string().describe('The description of the album.'),
-			nsfw: z.boolean().describe('Whether the album is nsfw or not.')
-		}),
-		z.object({
-			name: z.string().describe('The name of the album.')
-		}),
-		z.object({ description: z.string().describe('The description of the album.') }),
-		z.object({
-			nsfw: z.boolean().describe('Whether the album is nsfw or not.')
-		})
-	]),
+	body: z.object({
+		name: z.string().optional().describe('The name of the album.'),
+		description: z.string().optional().describe('The description of the album.'),
+		nsfw: z.boolean().optional().describe('Whether the album is nsfw or not.'),
+		sortOrder: z.string().optional().nullable().describe('The sort order for files in this album.')
+	}),
 	response: {
 		200: z.object({
 			message: responseMessageSchema
@@ -47,8 +39,13 @@ export const options = {
 export const run = async (req: RequestWithUser, res: FastifyReply) => {
 	const { uuid } = req.params as { uuid: string };
 
-	const { name, nsfw, description } = req.body as { description?: string; name?: string; nsfw?: boolean };
-	if (!name && nsfw === undefined && !description) {
+	const { name, nsfw, description, sortOrder } = req.body as {
+		description?: string;
+		name?: string;
+		nsfw?: boolean;
+		sortOrder?: string | null;
+	};
+	if (!name && nsfw === undefined && !description && sortOrder === undefined) {
 		void res.badRequest('No data supplied');
 		return;
 	}
@@ -69,7 +66,8 @@ export const run = async (req: RequestWithUser, res: FastifyReply) => {
 	const updateObj = {
 		name: name ?? album.name,
 		nsfw: nsfw === true ? true : nsfw === false ? false : album.nsfw,
-		description: description ?? album.description
+		description: description ?? album.description,
+		sortOrder: sortOrder === undefined ? album.sortOrder : sortOrder
 	};
 
 	await prisma.albums.update({

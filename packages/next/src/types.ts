@@ -132,6 +132,7 @@ export interface Album {
 	files?: FileWithAdditionalData[];
 	name: string;
 	nsfw: boolean;
+	sortOrder?: string | null;
 	uuid: string;
 	zippedAt: string;
 }
@@ -252,6 +253,7 @@ export interface Setting {
 	key: string;
 	name: string;
 	notice?: string;
+	options?: { label: string; value: string }[];
 	type: string;
 	value: any;
 }

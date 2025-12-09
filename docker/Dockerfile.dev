@@ -1,0 +1,19 @@
+FROM node:20-alpine
+
+RUN apk add --no-cache libc6-compat git
+RUN corepack enable
+
+WORKDIR /app
+
+COPY package.json yarn.lock .yarnrc.yml turbo.json tsconfig.json ./
+COPY .yarn ./.yarn
+COPY packages/next/package.json ./packages/next/
+
+RUN yarn workspaces focus @chibisafe/next
+
+EXPOSE 8001
+ENV HOSTNAME=0.0.0.0
+ENV HOST=0.0.0.0
+ENV PORT=8001
+
+CMD ["yarn", "workspace", "@chibisafe/next", "dev", "--port", "8001"]

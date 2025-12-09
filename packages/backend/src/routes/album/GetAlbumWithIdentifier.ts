@@ -7,6 +7,24 @@ import { queryLimitSchema } from '@/structures/schemas/QueryLimit.js';
 import { queryPageSchema } from '@/structures/schemas/QueryPage.js';
 import { responseMessageSchema } from '@/structures/schemas/ResponseMessage.js';
 import { constructFilePublicLink } from '@/utils/File.js';
+import { SETTINGS } from '@/structures/settings.js';
+
+const parseSortOrder = (sortOrder: string | null | undefined): { [key: string]: 'asc' | 'desc' } => {
+	const defaultOrder = { id: 'desc' as const };
+	if (!sortOrder) return defaultOrder;
+
+	const [field, direction] = sortOrder.split(':');
+	if (!field || !direction) return defaultOrder;
+
+	const validFields = ['createdAt', 'name', 'size'];
+	const validDirections = ['asc', 'desc'];
+
+	if (!validFields.includes(field) || !validDirections.includes(direction)) {
+		return defaultOrder;
+	}
+
+	return { [field]: direction as 'asc' | 'desc' };
+};
 
 export const schema = {
 	summary: 'Get public album',
@@ -83,6 +101,20 @@ export const run = async (req: FastifyRequest, res: FastifyReply) => {
 		return;
 	}
 
+	// First get the album's sortOrder
+	const albumMeta = await prisma.albums.findFirst({
+		where: {
+			id: link.albumId
+		},
+		select: {
+			sortOrder: true
+		}
+	});
+
+	// Determine sort order: album-specific > global default > fallback
+	const effectiveSortOrder = albumMeta?.sortOrder || SETTINGS.defaultSortOrder || 'createdAt:desc';
+	const orderBy = parseSortOrder(effectiveSortOrder);
+
 	// Make sure the uuid exists and it belongs to the user
 	const album = await prisma.albums.findFirst({
 		where: {
@@ -100,9 +132,7 @@ export const run = async (req: FastifyRequest, res: FastifyReply) => {
 					isWatched: true,
 					uuid: true
 				},
-				orderBy: {
-					id: 'desc'
-				},
+				orderBy,
 				...options
 			},
 			_count: true
