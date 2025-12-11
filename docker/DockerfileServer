@@ -1,7 +1,8 @@
 FROM node:20-alpine as runner
 
 RUN apk update
-RUN apk add --no-cache libc6-compat git ffmpeg openssl
+RUN apk add --no-cache libc6-compat git openssl libwebp libvpx
+RUN apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community ffmpeg
 
 WORKDIR /app
 COPY . .

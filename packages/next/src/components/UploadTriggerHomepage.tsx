@@ -6,7 +6,8 @@ import { Button as ShadcnButton } from './ui/button';
 import { formatBytes } from '@/lib/file';
 import type { Album, Settings } from '@/types';
 import { currentUserAtom } from '@/lib/atoms/currentUser';
-import { useAtomValue } from 'jotai';
+import { selectedAlbumAtom } from '@/lib/atoms/selectedAlbum';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { buttonVariants } from '@/styles/button';
 import { cn } from '@/lib/utils';
 import { Combobox } from './Combobox';
@@ -27,9 +28,10 @@ import { Label } from '@/components/ui/label';
 
 export const UploadTriggerHomepage = ({ settings }: { readonly settings: Settings }) => {
 	const currentUser = useAtomValue(currentUserAtom);
+	const selectedAlbum = useAtomValue(selectedAlbumAtom);
+	const setSelectedAlbum = useSetAtom(selectedAlbumAtom);
 	const [albums, setAlbums] = useState<Album[]>([]);
 	const [isDisabled, setIsDisabled] = useState(true);
-	const [selectedAlbum, setSelectedAlbum] = useState<string | null>(null);
 	const [selectedAlbumName, setSelectedAlbumName] = useState<string>('');
 	const [isLoggedIn, setIsLoggedIn] = useState(false);
 	const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
