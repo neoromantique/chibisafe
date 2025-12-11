@@ -1,7 +1,64 @@
-FROM node:20-alpine as runner
+# Build stage for ffmpeg with libwebp
+FROM alpine:3.19 AS ffmpeg-builder
 
-RUN apk update
-RUN apk add --no-cache libc6-compat git openssl
+RUN apk add --no-cache \
+    build-base \
+    pkgconf \
+    nasm \
+    yasm \
+    libwebp-dev \
+    libvpx-dev \
+    x264-dev \
+    x265-dev \
+    libtheora-dev \
+    libvorbis-dev \
+    lame-dev \
+    opus-dev \
+    freetype-dev \
+    zlib-dev
+
+RUN wget -O ffmpeg.tar.bz2 https://ffmpeg.org/releases/ffmpeg-6.1.tar.bz2 && \
+    tar xjf ffmpeg.tar.bz2 && \
+    cd ffmpeg-6.1 && \
+    ./configure \
+        --prefix=/usr/local \
+        --enable-gpl \
+        --enable-libwebp \
+        --enable-libvpx \
+        --enable-libx264 \
+        --enable-libx265 \
+        --enable-libtheora \
+        --enable-libvorbis \
+        --enable-libmp3lame \
+        --enable-libopus \
+        --enable-libfreetype \
+        --disable-debug \
+        --disable-doc \
+        --disable-ffplay \
+    && make -j$(nproc) \
+    && make install
+
+# Main application stage
+FROM node:20-alpine AS runner
+
+# Copy ffmpeg from builder
+COPY --from=ffmpeg-builder /usr/local/bin/ffmpeg /usr/local/bin/ffmpeg
+COPY --from=ffmpeg-builder /usr/local/bin/ffprobe /usr/local/bin/ffprobe
+
+# Install runtime dependencies for ffmpeg
+RUN apk add --no-cache \
+    libc6-compat \
+    git \
+    openssl \
+    libwebp \
+    libvpx \
+    x264-libs \
+    x265-libs \
+    libtheora \
+    libvorbis \
+    lame-libs \
+    opus \
+    freetype
 
 WORKDIR /app
 COPY . .
@@ -15,8 +72,8 @@ RUN yarn workspace @chibisafe/backend build
 ENV NODE_ENV=production
 
 EXPOSE 8000
-ENV HOSTNAME 0.0.0.0
-ENV HOST 0.0.0.0
-ENV PORT 8000
+ENV HOSTNAME=0.0.0.0
+ENV HOST=0.0.0.0
+ENV PORT=8000
 
 CMD ["yarn", "workspace", "@chibisafe/backend", "start"]

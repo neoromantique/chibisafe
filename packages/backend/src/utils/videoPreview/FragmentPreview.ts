@@ -1,12 +1,6 @@
 // @ts-ignore - no typings for this package
 import probe from 'ffmpeg-probe';
 import ffmpeg from 'fluent-ffmpeg';
-import ffmpegStatic from 'ffmpeg-static';
-
-const ffmpegPath = ffmpegStatic as unknown as string;
-if (ffmpegPath) {
-	ffmpeg.setFfmpegPath(ffmpegPath);
-}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 const noop = () => {};
