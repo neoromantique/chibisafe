@@ -1,4 +1,4 @@
-# Build stage for ffmpeg with libwebp
+# Build stage for static ffmpeg with libwebp
 FROM alpine:3.19 AS ffmpeg-builder
 
 RUN apk add --no-cache \
@@ -7,15 +7,29 @@ RUN apk add --no-cache \
     nasm \
     yasm \
     libwebp-dev \
+    libwebp-static \
     libvpx-dev \
     x264-dev \
+    x264-static \
     x265-dev \
+    x265-static \
     libtheora-dev \
+    libtheora-static \
     libvorbis-dev \
+    libvorbis-static \
     lame-dev \
+    lame-static \
     opus-dev \
+    opus-static \
     freetype-dev \
-    zlib-dev
+    freetype-static \
+    zlib-dev \
+    zlib-static \
+    libogg-dev \
+    libogg-static \
+    bzip2-dev \
+    bzip2-static \
+    xz-dev
 
 RUN wget -O ffmpeg.tar.bz2 https://ffmpeg.org/releases/ffmpeg-6.1.tar.bz2 && \
     tar xjf ffmpeg.tar.bz2 && \
@@ -23,6 +37,8 @@ RUN wget -O ffmpeg.tar.bz2 https://ffmpeg.org/releases/ffmpeg-6.1.tar.bz2 && \
     ./configure \
         --prefix=/usr/local \
         --enable-gpl \
+        --enable-static \
+        --disable-shared \
         --enable-libwebp \
         --enable-libvpx \
         --enable-libx264 \
@@ -35,30 +51,23 @@ RUN wget -O ffmpeg.tar.bz2 https://ffmpeg.org/releases/ffmpeg-6.1.tar.bz2 && \
         --disable-debug \
         --disable-doc \
         --disable-ffplay \
+        --pkg-config-flags="--static" \
+        --extra-ldflags="-static" \
+        --extra-cflags="-static" \
     && make -j$(nproc) \
     && make install
 
 # Main application stage
 FROM node:20-alpine AS runner
 
-# Copy ffmpeg from builder
+# Copy static ffmpeg from builder
 COPY --from=ffmpeg-builder /usr/local/bin/ffmpeg /usr/local/bin/ffmpeg
 COPY --from=ffmpeg-builder /usr/local/bin/ffprobe /usr/local/bin/ffprobe
 
-# Install runtime dependencies for ffmpeg
 RUN apk add --no-cache \
     libc6-compat \
     git \
-    openssl \
-    libwebp \
-    libvpx \
-    x264-libs \
-    x265-libs \
-    libtheora \
-    libvorbis \
-    lame-libs \
-    opus \
-    freetype
+    openssl
 
 WORKDIR /app
 COPY . .
