@@ -1,11 +1,16 @@
 import path from 'node:path';
 import { URL, fileURLToPath } from 'node:url';
 import ffmpeg from 'fluent-ffmpeg';
+import ffmpegPath from 'ffmpeg-static';
 import jetpack from 'fs-jetpack';
 import { SETTINGS } from '@/structures/settings.js';
 import { deleteTmpFile } from './File.js';
 import { log } from './Logger.js';
 import previewUtil from './videoPreview/FragmentPreview.js';
+
+if (ffmpegPath) {
+	ffmpeg.setFfmpegPath(ffmpegPath);
+}
 
 export const imageExtensions = ['.jpg', '.jpeg', '.gif', '.png', '.webp', '.svg', '.ico', '.heic', '.avif'];
 export const videoExtensions = ['.webm', '.mp4', '.wmv', '.avi', '.mov', '.mkv', '.mpeg', '.ogv'];
