@@ -1,5 +1,5 @@
-# Build stage for static ffmpeg with libwebp
-FROM alpine:3.19 AS ffmpeg-builder
+# Build stage for ffmpeg with libwebp
+FROM alpine:3.20 AS ffmpeg-builder
 
 RUN apk add --no-cache \
     build-base \
@@ -7,23 +7,19 @@ RUN apk add --no-cache \
     nasm \
     yasm \
     libwebp-dev \
-    libwebp-static \
     libvpx-dev \
+    x264-dev \
+    x265-dev \
     libtheora-dev \
-    libtheora-static \
     libvorbis-dev \
-    libvorbis-static \
     freetype-dev \
-    freetype-static \
     zlib-dev \
-    zlib-static \
     libogg-dev \
-    libogg-static \
     bzip2-dev \
-    bzip2-static \
     xz-dev \
     libpng-dev \
-    libpng-static
+    lame-dev \
+    opus-dev
 
 RUN wget -O ffmpeg.tar.bz2 https://ffmpeg.org/releases/ffmpeg-6.1.tar.bz2 && \
     tar xjf ffmpeg.tar.bz2 && \
@@ -31,33 +27,43 @@ RUN wget -O ffmpeg.tar.bz2 https://ffmpeg.org/releases/ffmpeg-6.1.tar.bz2 && \
     ./configure \
         --prefix=/usr/local \
         --enable-gpl \
-        --enable-static \
-        --disable-shared \
         --enable-libwebp \
         --enable-libvpx \
+        --enable-libx264 \
+        --enable-libx265 \
         --enable-libtheora \
         --enable-libvorbis \
         --enable-libfreetype \
+        --enable-libmp3lame \
+        --enable-libopus \
         --disable-debug \
         --disable-doc \
         --disable-ffplay \
-        --pkg-config-flags="--static" \
-        --extra-ldflags="-static" \
-        --extra-cflags="-static" \
     && make -j$(nproc) \
     && make install
 
 # Main application stage
-FROM node:20-alpine AS runner
+FROM node:20-alpine3.20 AS runner
 
-# Copy static ffmpeg from builder
+# Copy ffmpeg from builder
 COPY --from=ffmpeg-builder /usr/local/bin/ffmpeg /usr/local/bin/ffmpeg
 COPY --from=ffmpeg-builder /usr/local/bin/ffprobe /usr/local/bin/ffprobe
 
+# Install runtime dependencies (same versions as builder)
 RUN apk add --no-cache \
     libc6-compat \
     git \
-    openssl
+    openssl \
+    libwebp \
+    libvpx \
+    x264-libs \
+    x265-libs \
+    libtheora \
+    libvorbis \
+    freetype \
+    libogg \
+    lame-libs \
+    opus
 
 WORKDIR /app
 COPY . .
