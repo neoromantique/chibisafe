@@ -55,6 +55,7 @@ RUN apk add --no-cache \
     git \
     openssl \
     libwebp \
+    libwebp-tools \
     libvpx \
     x264-libs \
     x265-libs \
@@ -63,7 +64,11 @@ RUN apk add --no-cache \
     freetype \
     libogg \
     lame-libs \
-    opus
+    opus \
+    xz-libs \
+    bzip2-libs \
+    zlib \
+    libpng
 
 WORKDIR /app
 COPY . .
