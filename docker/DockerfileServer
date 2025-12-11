@@ -66,7 +66,7 @@ RUN apk add --no-cache \
     lame-libs \
     opus \
     xz-libs \
-    bzip2-libs \
+    libbz2 \
     zlib \
     libpng
 
