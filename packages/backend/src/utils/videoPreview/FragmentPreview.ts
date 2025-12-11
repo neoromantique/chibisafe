@@ -1,8 +1,9 @@
 // @ts-ignore - no typings for this package
 import probe from 'ffmpeg-probe';
 import ffmpeg from 'fluent-ffmpeg';
-import ffmpegPath from 'ffmpeg-static';
+import ffmpegStatic from 'ffmpeg-static';
 
+const ffmpegPath = ffmpegStatic as unknown as string;
 if (ffmpegPath) {
 	ffmpeg.setFfmpegPath(ffmpegPath);
 }
