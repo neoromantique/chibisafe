@@ -72,23 +72,23 @@ export function Combobox({
 								</CommandItem>
 							))}
 						</CommandGroup>
-						{createNewLabel && onCreateNew && (
-							<>
-								<CommandSeparator />
-								<CommandGroup>
-									<CommandItem
-										onSelect={() => {
-											setOpen(false);
-											onCreateNew();
-										}}
-									>
-										<PlusIcon className="mr-2 h-4 w-4" />
-										{createNewLabel}
-									</CommandItem>
-								</CommandGroup>
-							</>
-						)}
 					</CommandList>
+					{createNewLabel && onCreateNew && (
+						<>
+							<CommandSeparator />
+							<CommandGroup>
+								<CommandItem
+									onSelect={() => {
+										setOpen(false);
+										onCreateNew();
+									}}
+								>
+									<PlusIcon className="mr-2 h-4 w-4" />
+									{createNewLabel}
+								</CommandItem>
+							</CommandGroup>
+						</>
+					)}
 				</Command>
 			</PopoverContent>
 		</Popover>
