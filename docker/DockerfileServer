@@ -9,18 +9,10 @@ RUN apk add --no-cache \
     libwebp-dev \
     libwebp-static \
     libvpx-dev \
-    x264-dev \
-    x264-static \
-    x265-dev \
-    x265-static \
     libtheora-dev \
     libtheora-static \
     libvorbis-dev \
     libvorbis-static \
-    lame-dev \
-    lame-static \
-    opus-dev \
-    opus-static \
     freetype-dev \
     freetype-static \
     zlib-dev \
@@ -29,7 +21,9 @@ RUN apk add --no-cache \
     libogg-static \
     bzip2-dev \
     bzip2-static \
-    xz-dev
+    xz-dev \
+    libpng-dev \
+    libpng-static
 
 RUN wget -O ffmpeg.tar.bz2 https://ffmpeg.org/releases/ffmpeg-6.1.tar.bz2 && \
     tar xjf ffmpeg.tar.bz2 && \
@@ -41,12 +35,8 @@ RUN wget -O ffmpeg.tar.bz2 https://ffmpeg.org/releases/ffmpeg-6.1.tar.bz2 && \
         --disable-shared \
         --enable-libwebp \
         --enable-libvpx \
-        --enable-libx264 \
-        --enable-libx265 \
         --enable-libtheora \
         --enable-libvorbis \
-        --enable-libmp3lame \
-        --enable-libopus \
         --enable-libfreetype \
         --disable-debug \
         --disable-doc \
