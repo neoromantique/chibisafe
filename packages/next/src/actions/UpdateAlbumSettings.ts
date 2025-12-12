@@ -22,7 +22,7 @@ export const updateAlbumSettings = async (_: any, form: FormData) => {
 				name,
 				description,
 				nsfw,
-				sortOrder: sortOrder || null
+				sortOrder: sortOrder && sortOrder !== 'default' ? sortOrder : null
 			},
 			headers: {
 				authorization: `Bearer ${getToken()}`

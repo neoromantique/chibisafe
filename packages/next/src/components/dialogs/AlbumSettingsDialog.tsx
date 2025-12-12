@@ -127,12 +127,12 @@ export function AlbumSettingsDialog({ children }: PropsWithChildren<{}>) {
 							</div>
 							<div>
 								<Label htmlFor="sortOrder">Sort Order</Label>
-								<Select name="sortOrder" defaultValue={album?.sortOrder ?? ''}>
+								<Select name="sortOrder" defaultValue={album?.sortOrder ?? 'default'}>
 									<SelectTrigger>
 										<SelectValue placeholder="Use global default" />
 									</SelectTrigger>
 									<SelectContent>
-										<SelectItem value="">Use global default</SelectItem>
+										<SelectItem value="default">Use global default</SelectItem>
 										<SelectItem value="createdAt:desc">Newest first</SelectItem>
 										<SelectItem value="createdAt:asc">Oldest first</SelectItem>
 										<SelectItem value="name:asc">Name (A-Z)</SelectItem>
