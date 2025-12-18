@@ -23,7 +23,10 @@ jobs:
       -
         name: Get tag
         id: repository
-        run: echo "tag=$(git describe --tags HEAD)" > $GITHUB_ENV
+        run: |
+          ref="${GITHUB_REF_NAME}"
+          safe_ref="$(echo "${ref}" | tr '[:upper:]' '[:lower:]' | tr '/ ' '--')"
+          echo "tag=${safe_ref}" >> $GITHUB_ENV
 
       -
         name: Set up Docker Buildx
